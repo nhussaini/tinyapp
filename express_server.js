@@ -74,6 +74,20 @@ delete urlDatabase[shortURL];
 res.redirect("/urls");
 });
 
+//Update
+//display the urls_show page
+
+app.post("/urls/:shortURL/update", (req, res) =>{
+  //extract short url from req.params
+  const { shortURL } = req.params;
+  //extract the updated longURL from req.body
+  const {shortURLContent} = req.body;
+  //update the value inside the object
+  urlDatabase[shortURL] =shortURLContent;
+  res.redirect("/urls");
+
+});
+
 
 
 app.listen(PORT, () => {
