@@ -62,6 +62,19 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//Delete Route
+app.post("/urls/:shortURL/delete", (req, res) => {
+//extract the url form req.params
+const {shortURL} = req.params;
+console.log(req.params);
+//delete the targeted url
+delete urlDatabase[shortURL];
+
+//redirect
+res.redirect("/urls");
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
