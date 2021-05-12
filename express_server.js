@@ -1,4 +1,5 @@
 const express = require("express");
+const {generateRandomString, fetchUser, authenticateUser} = require("./helpers/helperFunctions");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -33,16 +34,16 @@ const users = {
   }
 }
 
-//returns a string of 6 random alphanumeric characters
-function generateRandomString() {
-  const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const length = 6;
-  for ( let i = 0; i < length; i++ ) {
-      result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
-  }
-  return result;
-}
+// //returns a string of 6 random alphanumeric characters
+// function generateRandomString() {
+//   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//   let result = '';
+//   const length = 6;
+//   for ( let i = 0; i < length; i++ ) {
+//       result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+//   }
+//   return result;
+// }
 
 
 app.get("/urls", (req, res) => {
@@ -61,11 +62,8 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let shortURL = generateRandomString();
-  //console.log(shortURL);
   let longURL = req.body.longURL;
-  //console.log(longURL);
   urlDatabase[shortURL] = longURL;
-  
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -82,6 +80,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+//route for the shortURL
 app.get("/urls/:shortURL", (req, res) => {
   let userId = req.cookies["user_id"];
   const templateVars = { user: users[userId], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */ };
@@ -95,14 +94,12 @@ const {shortURL} = req.params;
 console.log(req.params);
 //delete the targeted url
 delete urlDatabase[shortURL];
-
 //redirect
 res.redirect("/urls");
 });
 
 //Update
 //display the urls_show page
-
 app.post("/urls/:shortURL/update", (req, res) =>{
   //extract short url from req.params
   const { shortURL } = req.params;
@@ -113,17 +110,6 @@ app.post("/urls/:shortURL/update", (req, res) =>{
   res.redirect("/urls");
 
 });
-
-// //handle login
-// app.post("/login", (req, res) =>{
-//   //console.log(req.body);
-//   const { username } = req.body;
-//   //console.log(username);
-//   //set the cookie name username
-//   res.cookie('username', username);
-//   //redirect to the /urls
-//   res.redirect("/urls")
-// });
 
 //Logout route
 app.post("/logout", (req, res) => {
@@ -143,19 +129,19 @@ app.get("/register", (req,res) => {
 });
 
 //fetchUser function
-const fetchUser = (email) =>{
-  for (const key in users) {
-    if (users[key].email === email) {
-      return users[key];
-    }
-  }
-}
+// const fetchUser = (email) =>{
+//   for (const key in users) {
+//     if (users[key].email === email) {
+//       return users[key];
+//     }
+//   }
+// }
 
 
 //register a new user
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-  if(fetchUser(email)){
+  if(fetchUser(email, users)){
     return res.status(400).send('User already exists');
   }
   if (!email || !password) {
@@ -194,13 +180,13 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   //If a user with that e-mail cannot be found, return a response with a 403 status code.
-  if(!fetchUser(email)) {
+  if(!fetchUser(email, users)) {
     res.status(403).send("This user is not registered");
   }
   //If a user with that e-mail address is located,
   // compare the password given in the form with the existing user's password.
   // If it does not match, return a response with a 403 status code.
-  const result = authenticateUser(req.body);
+  const result = authenticateUser(req.body, users);
   if(result.error) {
     return res.status(403).send("wrong passwrod");
   }
