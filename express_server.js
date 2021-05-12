@@ -131,16 +131,36 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+
+
 //register route
 //show the registration form
 app.get("/register", (req,res) => {
   res.render("register_form");
 });
 
+//fetchUser function
+const fetchUser = (email) =>{
+  for (const key in users) {
+    if (users[key].email === email) {
+      return users[key];
+    }
+  }
+}
+
 //register a new user
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
+  
+  if(fetchUser(email)){
+    return res.status(400).send('User already exists');
+  }
   //console.log(email, password);
+  if (!email || !password) {
+    return res.status(400).send('Invalid fields');
+  }
+
+  
   const userId = generateRandomString();
   //console.log(userId);
   const newUser = {id : userId, email : email, password : password};
