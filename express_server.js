@@ -24,7 +24,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "abcd"
   },
  "user2RandomID": {
     id: "user2RandomID", 
@@ -114,20 +114,20 @@ app.post("/urls/:shortURL/update", (req, res) =>{
 
 });
 
-//handle login
-app.post("/login", (req, res) =>{
-  //console.log(req.body);
-  const { username } = req.body;
-  //console.log(username);
-  //set the cookie name username
-  res.cookie('username', username);
-  //redirect to the /urls
-  res.redirect("/urls")
-});
+// //handle login
+// app.post("/login", (req, res) =>{
+//   //console.log(req.body);
+//   const { username } = req.body;
+//   //console.log(username);
+//   //set the cookie name username
+//   res.cookie('username', username);
+//   //redirect to the /urls
+//   res.redirect("/urls")
+// });
 
 //Logout route
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls");
 });
 
@@ -136,7 +136,10 @@ app.post("/logout", (req, res) => {
 //register route
 //show the registration form
 app.get("/register", (req,res) => {
-  res.render("register_form");
+  const templateVars = {
+    user: null,
+  }
+  res.render("register_form",templateVars);
 });
 
 //fetchUser function
@@ -147,6 +150,7 @@ const fetchUser = (email) =>{
     }
   }
 }
+
 
 //register a new user
 app.post("/register", (req,res) => {
@@ -165,8 +169,44 @@ app.post("/register", (req,res) => {
 });
 
 //show the login form
-app.get("/login", (req,res) => {
-  res.render("login_form");
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: null,
+  }
+  res.render("login_form", templateVars);
+});
+
+// const authenticateUser = (useParams) => {
+//   const { email, password } = useParams;
+//   for (let key in users){
+//     console.log(users[key].password);
+//     if (users[key].email === email){
+//       console.log(users[key].email);
+//       if(users[key].password === password) {
+//         return {data: users[key], error: null};
+//       }
+//       return {data: null, error: "wrong password"};
+//     }
+//   }
+//   return { data: null, error: "bad email" }
+// }
+//login a user
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  //If a user with that e-mail cannot be found, return a response with a 403 status code.
+  if(!fetchUser(email)) {
+    res.status(403).send("This user is not registered");
+  }
+  //If a user with that e-mail address is located,
+  // compare the password given in the form with the existing user's password.
+  // If it does not match, return a response with a 403 status code.
+  const result = authenticateUser(req.body);
+  if(result.error) {
+    return res.status(403).send("wrong passwrod");
+  }
+  //If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
+  res.cookie('user_id', result.data.id);
+  return res.redirect("/urls")
 });
 
 

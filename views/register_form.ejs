@@ -11,8 +11,12 @@
   </head>
 
   <body>
+    <%- include('partials/_header') %>
     <div class="container">
-      <div style="max-width: 400px; margin:200px auto; border:gray 1px solid; padding: 5px; border-radius: 5px;">
+      <div style="max-width: 400px; margin:100px auto 5px auto;">
+        <h3>Create Account</h3>
+      </div>
+      <div style="max-width: 400px; margin:auto; border:gray 1px solid; padding: 5px; border-radius: 5px;">
     <form method="POST" action="/register">
       <div class="form-group">
         <label for="exampleInputEmail1">Email address</label>
