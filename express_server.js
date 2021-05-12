@@ -104,9 +104,15 @@ app.post("/login", (req, res) =>{
 });
 
 //Logout route
-app.post("/logout", (req, res) =>{
+app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect("/urls");
+});
+
+//register route
+//show the registration form
+app.get("/register", (req,res) => {
+  res.render("register_form");
 });
 
 
