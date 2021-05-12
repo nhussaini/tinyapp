@@ -151,24 +151,22 @@ const fetchUser = (email) =>{
 //register a new user
 app.post("/register", (req,res) => {
   const { email, password } = req.body;
-  
   if(fetchUser(email)){
     return res.status(400).send('User already exists');
   }
-  //console.log(email, password);
   if (!email || !password) {
     return res.status(400).send('Invalid fields');
   }
-
-  
   const userId = generateRandomString();
-  //console.log(userId);
   const newUser = {id : userId, email : email, password : password};
   users[userId] = newUser;
-  //console.log(users);
   res.cookie('user_id', userId);
   res.redirect("/urls");
+});
 
+//show the login form
+app.get("/login", (req,res) => {
+  res.render("login_form");
 });
 
 
