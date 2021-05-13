@@ -53,15 +53,33 @@ const users = {
 //   return result;
 // }
 
-
-app.get("/urls", (req, res) => {
-  let userId = req.cookies["user_id"];
-  //display a message or prompt suggesting that they log in or register first if the user is not logged in
-  if(!userId) {
-    res.send("Please login or register first");
+const urlsForUser = (id) => {
+  let userUrl = {};
+  for (let key in urlDatabase ) {
+    if (urlDatabase[key].userID === id) {
+      userUrl[key] = urlDatabase[key]; 
+    }
   }
-  const templateVars = { user: users[userId], urls: urlDatabase};
-  res.render("urls_index", templateVars);
+  return userUrl;
+}
+const user = (id) =>{
+  for (const key in users) {
+    if (key === id) {
+      return users[key];
+    }
+  }
+}
+app.get("/urls", (req, res) => {
+  let currentUser = user(req.cookies["user_id"])
+  //let userId = req.cookies["user_id"];
+ 
+ if(!currentUser) {
+   res.redirect("/login")
+ } else {
+   const templateVars = { user: currentUser, urls: urlsForUser(req.cookies["user_id"])};
+   res.render("urls_index", templateVars);
+ }
+  
 });
 
 //route for a new URL
@@ -107,25 +125,37 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //Delete Route
 app.post("/urls/:shortURL/delete", (req, res) => {
+  let currentUser = user(req.cookies["user_id"])
 //extract the url form req.params
 const {shortURL} = req.params;
 console.log(req.params);
 //delete the targeted url
-delete urlDatabase[shortURL];
-//redirect
-res.redirect("/urls");
+if(!currentUser) {
+  res.send("This is not your account");
+} else {
+  delete urlDatabase[shortURL];
+  //redirect
+  res.redirect("/urls");
+}
+
 });
 
 //Update
 //display the urls_show page
 app.post("/urls/:shortURL/update", (req, res) =>{
+  let currentUser = user(req.cookies["user_id"])
   //extract short url from req.params
   const { shortURL } = req.params;
   //extract the updated longURL from req.body
   const {shortURLContent} = req.body;
   //update the value inside the object
-  urlDatabase[shortURL] =shortURLContent;
+  if(!currentUser) {
+    res.send("this is not your account");
+  } else {
+    urlDatabase[shortURL] =shortURLContent;
   res.redirect("/urls");
+  }
+  
 
 });
 
