@@ -13,9 +13,17 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 //URL Database
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+// const urlDatabase = {
+//   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+//   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+// };
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "userRandomID" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "user2RandomID" }
 };
 
 
@@ -48,6 +56,10 @@ const users = {
 
 app.get("/urls", (req, res) => {
   let userId = req.cookies["user_id"];
+  //display a message or prompt suggesting that they log in or register first if the user is not logged in
+  if(!userId) {
+    res.send("Please login or register first");
+  }
   const templateVars = { user: users[userId], urls: urlDatabase};
   res.render("urls_index", templateVars);
 });
@@ -55,6 +67,9 @@ app.get("/urls", (req, res) => {
 //route for a new URL
 app.get("/urls/new", (req, res) => {
   let userId = req.cookies["user_id"];
+  if (!userId){
+    res.redirect("/login");
+  }
   const templateVars = { user: users[userId]};
   res.render("urls_new", templateVars);
 });
@@ -63,7 +78,8 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = {longURL: longURL, userID: req.cookies["user_id"]};
+  console.log("urlDatabase:", urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -83,7 +99,9 @@ app.get("/u/:shortURL", (req, res) => {
 //route for the shortURL
 app.get("/urls/:shortURL", (req, res) => {
   let userId = req.cookies["user_id"];
-  const templateVars = { user: users[userId], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */ };
+  //const templateVars = { user: users[userId], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */ };
+  const templateVars = { user: users[userId], shortURL: req.params.shortURL, urls: urlDatabase/* What goes here? */ };
+
   res.render("urls_show", templateVars);
 });
 
@@ -149,7 +167,9 @@ app.post("/register", (req,res) => {
   }
   const userId = generateRandomString();
   const newUser = {id : userId, email : email, password : password};
+  //console.log("newUser",newUser);
   users[userId] = newUser;
+  console.log("userdb",users);
   res.cookie('user_id', userId);
   res.redirect("/urls");
 });
