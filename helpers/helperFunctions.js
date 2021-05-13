@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 //returns a string of 6 random alphanumeric characters
 function generateRandomString() {
   const randomChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -25,7 +27,8 @@ const authenticateUser = (useParams, users) => {
     console.log(users[key].password);
     if (users[key].email === email){
       console.log(users[key].email);
-      if(users[key].password === password) {
+      //if(users[key].password === password) {//if (user && bcrypt.compareSync(password, user.password)) 
+        if (bcrypt.compareSync(password, users[key].password)) {
         return {data: users[key], error: null};
       }
       return {data: null, error: "wrong password"};

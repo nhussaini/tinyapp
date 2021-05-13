@@ -1,6 +1,8 @@
 const express = require("express");
 const {generateRandomString, fetchUser, authenticateUser} = require("./helpers/helperFunctions");
 const app = express();
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const PORT = 8080; // default port 8080
 
 //set ejs as the view engine
@@ -33,12 +35,13 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "abcd"
+    password: bcrypt.hashSync('abc', saltRounds)
+     
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync('hello', saltRounds)
   }
 }
 
@@ -195,9 +198,13 @@ app.post("/register", (req,res) => {
   if (!email || !password) {
     return res.status(400).send('Invalid fields');
   }
+
+  //bcrypt the password
+  const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
   const userId = generateRandomString();
-  const newUser = {id : userId, email : email, password : password};
-  //console.log("newUser",newUser);
+  const newUser = {id : userId, email : email, password : hashedPassword};
+  console.log("newUser",newUser);
   users[userId] = newUser;
   console.log("userdb",users);
   res.cookie('user_id', userId);
@@ -212,21 +219,6 @@ app.get("/login", (req, res) => {
   res.render("login_form", templateVars);
 });
 
-// const authenticateUser = (useParams) => {
-//   const { email, password } = useParams;
-//   for (let key in users){
-//     console.log(users[key].password);
-//     if (users[key].email === email){
-//       console.log(users[key].email);
-//       if(users[key].password === password) {
-//         return {data: users[key], error: null};
-//       }
-//       return {data: null, error: "wrong password"};
-//     }
-//   }
-//   return { data: null, error: "bad email" }
-// }
-//login a user
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
   //If a user with that e-mail cannot be found, return a response with a 403 status code.
