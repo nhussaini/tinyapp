@@ -11,23 +11,21 @@ function generateRandomString() {
   return result;
 }
 
-//fetchUser function
-const fetchUser = (email, users) =>{
+//get a user with email
+const getUserByEmail = (email, users) =>{
   for (const key in users) {
     if (users[key].email === email) {
       return users[key];
     }
   }
+  return undefined;
 }
 
 //authenticate a user
 const authenticateUser = (useParams, users) => {
   const { email, password } = useParams;
   for (let key in users){
-    console.log(users[key].password);
     if (users[key].email === email){
-      console.log(users[key].email);
-      //if(users[key].password === password) {//if (user && bcrypt.compareSync(password, user.password)) 
         if (bcrypt.compareSync(password, users[key].password)) {
         return {data: users[key], error: null};
       }
@@ -37,4 +35,23 @@ const authenticateUser = (useParams, users) => {
   return { data: null, error: "bad email" }
 }
 
-module.exports = {generateRandomString, fetchUser, authenticateUser}
+//function to get urls for a specific user
+const urlsForUser = (id, urlDatabase) => {
+  let userUrl = {};
+  for (let key in urlDatabase ) {
+    if (urlDatabase[key].userID === id) {
+      userUrl[key] = urlDatabase[key]; 
+    }
+  }
+  return userUrl;
+}
+
+//function to get a user by session_id
+const getUserById = (id, users) =>{
+  for (const key in users) {
+    if (key === id) {
+      return users[key];
+    }
+  }
+}
+module.exports = {generateRandomString, getUserByEmail, authenticateUser, urlsForUser, getUserById}
