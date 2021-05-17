@@ -39,6 +39,16 @@ const users = {
   }
 }
 
+//route for Get /
+app.get("/", (req, res) =>{
+  //if a user is logged in, redirect to /urls
+  if(req.session['user_id']) {
+    res.redirect("/urls");
+  } else {//if a user is not logged in
+    res.redirect("/login");
+  }
+});
+
 //get the urls
 app.get("/urls", (req, res) => {
   let currentUser = getUserById(req.session['user_id'], users);
@@ -74,14 +84,11 @@ app.post("/urls", (req, res) => {
 //route redirect to long url through shortURL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   //edge case
   if(longURL){
     res.redirect(longURL);
   } 
-  else {
-    res.redirect('/urls');
-  }
 });
 
 //route for the shortURL
@@ -200,7 +207,6 @@ app.post("/login", (req, res) => {
   //If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
   //setCookie with the user id
   req.session['user_id'] = result.data.id;
-  //res.cookie('user_id', result.data.id);
   return res.redirect("/urls")
 });
 
