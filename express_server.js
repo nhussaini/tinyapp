@@ -74,6 +74,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  if (!req.session['user_id']) {
+    return res.send('<h3><a href="/login">log in first please</a></h3>');
+  }
   let shortURL = generateRandomString();
   let longURL = req.body.longURL;
   urlDatabase[shortURL] = {longURL: longURL, userID: req.session['user_id']};
